@@ -17,6 +17,5 @@ public class Main {
             System.out.print(integer+" ");
         }
         //System.out.println(String.format("%.2f",(Math.abs(firstComeFirstService.getTurnAroundTime()-firstJob.getTurnAroundTime())/firstJob.getTurnAroundTime())*100.00));
-
     }
 }
