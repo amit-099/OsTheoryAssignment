@@ -13,7 +13,7 @@ public class RoundRobin {
     private int totalFaults;
     private int processQuanta;
 
-    public RoundRobin(ArrayList<Process> processArrayList, int numberOfProcess, int processQuanta) {
+    RoundRobin(ArrayList<Process> processArrayList, int numberOfProcess, int processQuanta) {
         this.processArrayList = processArrayList;
         this.numberOfProcess = numberOfProcess;
         this.processQuanta = processQuanta;
@@ -88,16 +88,29 @@ public class RoundRobin {
         this.totalFaults = totalFaults;
     }
 
-    private int getExecTime(Process process, int processQuanta) {
+    private int getExecTime(Process process, int aProcessQuanta) {
         int execTime = 0;
         int[] pageRef = process.getPageRefs();
         ProcessOperation operation = new ProcessOperation(process);
 
         int frameID = operation.getFrameID(pageRef[process.alreadyExecutedIdx]);
-        operation.fixFramePosition(frameID);
-        execTime += Math.min(processQuanta, process.processQuanta[process.alreadyExecutedIdx]);
-        process.processQuanta[process.alreadyExecutedIdx] -= Math.min(processQuanta, process.processQuanta[process.alreadyExecutedIdx]);
-        if(process.processQuanta[process.alreadyExecutedIdx] <= 0) process.alreadyExecutedIdx += 1;
+
+        while(frameID != -1 && process.alreadyExecutedIdx < pageRef.length && aProcessQuanta > 0) {
+            operation.fixFramePosition(frameID);
+
+            int execTempTime = Math.min(aProcessQuanta, process.processQuanta[process.alreadyExecutedIdx]);
+
+            execTime += execTempTime;
+            aProcessQuanta -= execTempTime;
+            process.processQuanta[process.alreadyExecutedIdx] -= execTempTime;
+
+            if(process.processQuanta[process.alreadyExecutedIdx] <= 0)
+                process.alreadyExecutedIdx += 1;
+
+            if(process.alreadyExecutedIdx < pageRef.length) {
+                frameID = operation.getFrameID(pageRef[process.alreadyExecutedIdx]);
+            }
+        }
         return execTime;
     }
 
@@ -128,10 +141,23 @@ public class RoundRobin {
                     totalFaults = returnfault[0];
                     blockedTime = returnfault[1];
                 } else {
-                    processPriorityQueue.remove();
-                    totalTime += getExecTime(aProcess, processQuanta);
-                    aProcess.processArrivalTime = totalTime;
-                    processPriorityQueue.add(aProcess);
+                    int execTime = getExecTime(aProcess, processQuanta);
+                    totalTime += execTime;
+
+                    if(execTime < processQuanta) {
+                        if(aProcess.alreadyExecutedIdx >= aPageRef.length) {
+                            processPriorityQueue.remove();
+                            turnAroundTime += totalTime;
+                        }
+                    } else {
+                        processPriorityQueue.remove();
+                        if(aProcess.alreadyExecutedIdx >= aPageRef.length) {
+                            turnAroundTime += totalTime;
+                        } else {
+                            aProcess.processArrivalTime = totalTime;
+                            processPriorityQueue.add(aProcess);
+                        }
+                    }
                 }
             }
         }

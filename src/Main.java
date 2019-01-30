@@ -11,7 +11,7 @@ public class Main {
         firstComeFirstServe.FCFS();
 
         System.out.print("FCFS ");
-        double gain_fcfs = (Math.abs(firstComeFirstServe.getTurnAroundTime()-firstComeFirstServe.getTurnAroundTime())/firstComeFirstServe.getTurnAroundTime())*100.00;
+        double gain_fcfs = ((firstComeFirstServe.getTurnAroundTime() - firstComeFirstServe.getTurnAroundTime()) / firstComeFirstServe.getTurnAroundTime()) * 100.00;
         printFunction(firstComeFirstServe.getWaitingTime(), firstComeFirstServe.getTurnAroundTime(), firstComeFirstServe.getTotalFaults(), firstComeFirstServe.getPageFaultList(), gain_fcfs);
 
 
@@ -22,7 +22,7 @@ public class Main {
         shortestJobFirst.SJF();
 
         System.out.print("SJF ");
-        double gain_sjf = (Math.abs(firstComeFirstServe.getTurnAroundTime()-shortestJobFirst.getTurnAroundTime())/shortestJobFirst.getTurnAroundTime())*100.00;
+        double gain_sjf = ((firstComeFirstServe.getTurnAroundTime() - shortestJobFirst.getTurnAroundTime()) / shortestJobFirst.getTurnAroundTime()) * 100.00;
         printFunction(shortestJobFirst.getWaitingTime(), shortestJobFirst.getTurnAroundTime(), shortestJobFirst.getTotalFaults(), shortestJobFirst.getPageFaultList(), gain_sjf);
 
 
@@ -34,7 +34,7 @@ public class Main {
         roundRobin.RRS();
 
         System.out.print("RRS ");
-        double gain_rrs = (Math.abs(firstComeFirstServe.getTurnAroundTime()-roundRobin.getTurnAroundTime())/roundRobin.getTurnAroundTime())*100.00;
+        double gain_rrs = ((firstComeFirstServe.getTurnAroundTime() - roundRobin.getTurnAroundTime()) / roundRobin.getTurnAroundTime()) * 100.00;
         printFunction(roundRobin.getWaitingTime(), roundRobin.getTurnAroundTime(), roundRobin.getTotalFaults(), roundRobin.getPageFaultList(), gain_rrs);
     }
 
