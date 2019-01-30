@@ -4,18 +4,46 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        ProcessList processList = new ProcessList();
-        ArrayList<Process> processArrayList = processList.getProcessedArrayList();
-        int processQuanta = processList.getPerProcessQuanta();
-        int numberOfProcess = processList.getNumberOfProcess();
-        ShortestJobFirst shortestJobFirst = new ShortestJobFirst(processArrayList, numberOfProcess);
+        ProcessList processList_fcfs = new ProcessList();
+        ArrayList<Process> processArrayList_fcfs = processList_fcfs.getProcessedArrayList();
+        int numberOfProcess = processList_fcfs.getNumberOfProcess();
+        FirstComeFirstServe firstComeFirstServe = new FirstComeFirstServe(processArrayList_fcfs, numberOfProcess);
+        firstComeFirstServe.FCFS();
+
+        System.out.print("FCFS ");
+        double gain_fcfs = (Math.abs(firstComeFirstServe.getTurnAroundTime()-firstComeFirstServe.getTurnAroundTime())/firstComeFirstServe.getTurnAroundTime())*100.00;
+        printFunction(firstComeFirstServe.getWaitingTime(), firstComeFirstServe.getTurnAroundTime(), firstComeFirstServe.getTotalFaults(), firstComeFirstServe.getPageFaultList(), gain_fcfs);
+
+
+        ProcessList processList_sjf = new ProcessList();
+        ArrayList<Process> processArrayList_sjf = processList_sjf.getProcessedArrayList();
+        numberOfProcess = processList_sjf.getNumberOfProcess();
+        ShortestJobFirst shortestJobFirst = new ShortestJobFirst(processArrayList_sjf, numberOfProcess);
         shortestJobFirst.SJF();
 
-        System.out.print("SJF "+String.format("%.2f",shortestJobFirst.getWaitingTime())+" "+String.format("%.2f",shortestJobFirst.getTurnAroundTime())+" "+shortestJobFirst.getTotalFaults()+" ");
-        for(Integer integer: shortestJobFirst.getPageFaultList())
-        {
-            System.out.print(integer+" ");
+        System.out.print("SJF ");
+        double gain_sjf = (Math.abs(firstComeFirstServe.getTurnAroundTime()-shortestJobFirst.getTurnAroundTime())/shortestJobFirst.getTurnAroundTime())*100.00;
+        printFunction(shortestJobFirst.getWaitingTime(), shortestJobFirst.getTurnAroundTime(), shortestJobFirst.getTotalFaults(), shortestJobFirst.getPageFaultList(), gain_sjf);
+
+
+        ProcessList processList_rrs = new ProcessList();
+        ArrayList<Process> processArrayList_rrs = processList_rrs.getProcessedArrayList();
+        int processQuanta = processList_rrs.getPerProcessQuanta();
+        numberOfProcess = processList_rrs.getNumberOfProcess();
+        RoundRobin roundRobin = new RoundRobin(processArrayList_rrs, numberOfProcess, processQuanta);
+        roundRobin.RRS();
+
+        System.out.print("RRS ");
+        double gain_rrs = (Math.abs(firstComeFirstServe.getTurnAroundTime()-roundRobin.getTurnAroundTime())/roundRobin.getTurnAroundTime())*100.00;
+        printFunction(roundRobin.getWaitingTime(), roundRobin.getTurnAroundTime(), roundRobin.getTotalFaults(), roundRobin.getPageFaultList(), gain_rrs);
+    }
+
+    private static void printFunction(double waitingTime, double turnAround, int totalFault, ArrayList<Integer> faultList, double gain) {
+        System.out.printf("%.2f, %.2f, ", waitingTime, turnAround);
+        System.out.print(totalFault);
+        for(Integer integer: faultList) {
+            System.out.print(", " + integer);
         }
-        //System.out.println(String.format("%.2f",(Math.abs(firstComeFirstService.getTurnAroundTime()-firstJob.getTurnAroundTime())/firstJob.getTurnAroundTime())*100.00));
+        System.out.printf(", %.2f\n", gain);
     }
 }

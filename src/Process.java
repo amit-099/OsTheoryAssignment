@@ -2,11 +2,11 @@ import java.util.Arrays;
 
 public class Process {
     private int processID;
-    private int processArrivalTime;
+    public int processArrivalTime;
     private int numberOfPages;
     private int memoryRefs[];
     private int pageRefs[];
-    private int processQuanta[];
+    public int processQuanta[];
     private int LRUFrameArray[];
     private int frameArrayLength;
     public int pageFault = 0;
@@ -21,6 +21,7 @@ public class Process {
         this.processQuanta = processQuanta;
         this.LRUFrameArray = LRUFrameArray;
         this.frameArrayLength = frameArrayLength;
+        this.alreadyExecutedIdx = 0;
     }
 
     public int getProcessID() {

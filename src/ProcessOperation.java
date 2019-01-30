@@ -13,7 +13,7 @@ public class ProcessOperation {
         pageRef = aProcess.getPageRefs();
     }
 
-    private void fixFramePosition(int currentIdx) {
+    public void fixFramePosition(int currentIdx) {
         for(int i = currentIdx; i > 0; i--) {
             int temp = frameArray[i];
             frameArray[i] = frameArray[i - 1];
@@ -21,12 +21,12 @@ public class ProcessOperation {
         }
     }
 
-    private int getFrameID(int aPageID) {
+    public int getFrameID(int aPageID) {
         for(int i = 0; i < aProcess.getFrameArrayLength(); i++) if(frameArray[i] == aPageID) return i;
         return -1;
     }
 
-    private int findFreeSlot() {
+    public int findFreeSlot() {
         return aProcess.getFrameArrayLength() - 1;
     }
 
@@ -71,5 +71,22 @@ class ExecutionTimeComp implements Comparator<Process> {
     public int compare(Process p1, Process p2) {
         return (new ProcessOperation(p1).getExecutionTime() + new ProcessOperation(p1).getPageFaultTime()) -
                 (new ProcessOperation(p2).getExecutionTime() + new ProcessOperation(p2).getPageFaultTime());
+    }
+}
+
+class ArrivalTimeCompFCFS implements Comparator<Process> {
+
+    @Override
+    public int compare(Process p1, Process p2) {
+        return p1.getProcessArrivalTime() - p2.getProcessArrivalTime();
+    }
+}
+
+class ArrivalTimeCompRRS implements Comparator<Process> {
+
+    @Override
+    public int compare(Process p1, Process p2) {
+        if(p1.getProcessArrivalTime() >= p2.getProcessArrivalTime()) return 1;
+        else return p1.getProcessArrivalTime() - p2.getProcessArrivalTime();
     }
 }

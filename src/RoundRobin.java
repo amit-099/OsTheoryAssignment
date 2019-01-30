@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-public class FirstComeFirstServe {
+public class RoundRobin {
     private ArrayList<Process> processArrayList;
     private ArrayList<Integer> pageFaultList = new ArrayList<>();
 
@@ -11,18 +11,18 @@ public class FirstComeFirstServe {
     private int waitingTime;
     private int totalTime;
     private int totalFaults;
+    private int processQuanta;
 
-    public FirstComeFirstServe(ArrayList<Process> processArrayList, int numberOfProcess) {
+    public RoundRobin(ArrayList<Process> processArrayList, int numberOfProcess, int processQuanta) {
         this.processArrayList = processArrayList;
         this.numberOfProcess = numberOfProcess;
+        this.processQuanta = processQuanta;
         this.blockedTime = 0;
         this.turnAroundTime = 0;
         this.waitingTime = 0;
         this.totalTime = 0;
         this.totalFaults = 0;
     }
-
-    public FirstComeFirstServe() {}
 
     public ArrayList<Process> getProcessArrayList() {
         return processArrayList;
@@ -48,11 +48,11 @@ public class FirstComeFirstServe {
         this.numberOfProcess = numberOfProcess;
     }
 
-    public int getExecutionTime() {
+    public int getBlockedTime() {
         return blockedTime;
     }
 
-    public void setExecutionTime(int blockedTime) {
+    public void setBlockedTime(int blockedTime) {
         this.blockedTime = blockedTime;
     }
 
@@ -88,43 +88,22 @@ public class FirstComeFirstServe {
         this.totalFaults = totalFaults;
     }
 
-    public int[] handlePageFault(Process aProcess, PriorityQueue<Process> processPriorityQueue, ProcessOperation operation, int totalFaults, int blockedTime, int totalTime) {
-        int[] frameArray = aProcess.getLRUFrameArray();
-        int[] aPageRef = aProcess.getPageRefs();
-        int freeSlot = operation.findFreeSlot();
-        int[] returnVal = new int[2];
-        totalFaults += 1;
-        aProcess.pageFault += 1;
-        processPriorityQueue.remove();
-        blockedTime = Math.max(aProcess.getProcessArrivalTime(), blockedTime);
-        blockedTime = Math.max(blockedTime, totalTime);
-        blockedTime += 60;
-        aProcess.processArrivalTime = blockedTime;
-        frameArray[freeSlot] = aPageRef[aProcess.alreadyExecutedIdx];
-        operation.fixFramePosition(freeSlot);
-        processPriorityQueue.add(aProcess);
-        returnVal[0] = totalFaults;
-        returnVal[1] = blockedTime;
-        return returnVal;
-    }
-
-    public int calculateExecTime(Process aProcess) {
+    private int getExecTime(Process process, int processQuanta) {
         int execTime = 0;
-        int[] pageRef = aProcess.getPageRefs();
-        ProcessOperation operation = new ProcessOperation(aProcess);
+        int[] pageRef = process.getPageRefs();
+        ProcessOperation operation = new ProcessOperation(process);
 
-        while(aProcess.alreadyExecutedIdx < aProcess.getPageRefs().length &&
-                operation.getFrameID(pageRef[aProcess.alreadyExecutedIdx]) != -1) {
-            int frameID = operation.getFrameID(pageRef[aProcess.alreadyExecutedIdx]);
-            operation.fixFramePosition(frameID);
-            execTime += 30;
-            aProcess.alreadyExecutedIdx += 1;
-        }
+        int frameID = operation.getFrameID(pageRef[process.alreadyExecutedIdx]);
+        operation.fixFramePosition(frameID);
+        execTime += Math.min(processQuanta, process.processQuanta[process.alreadyExecutedIdx]);
+        process.processQuanta[process.alreadyExecutedIdx] -= Math.min(processQuanta, process.processQuanta[process.alreadyExecutedIdx]);
+        if(process.processQuanta[process.alreadyExecutedIdx] <= 0) process.alreadyExecutedIdx += 1;
         return execTime;
     }
 
-    public void FCFS() {
-        PriorityQueue<Process> processPriorityQueue = new PriorityQueue<>(new ArrivalTimeCompFCFS());
+    public void RRS() {
+        PriorityQueue<Process> processPriorityQueue = new PriorityQueue<>(new ArrivalTimeCompRRS());
+
         for(Process process: processArrayList) {
             processPriorityQueue.add(process);
             turnAroundTime -= process.getProcessArrivalTime();
@@ -132,7 +111,7 @@ public class FirstComeFirstServe {
         }
 
         int[] aPageRef;
-        int[] returnPageFault;
+        int[] returnfault;
         while(!processPriorityQueue.isEmpty()) {
             Process aProcess = processPriorityQueue.peek();
             ProcessOperation processOperation = new ProcessOperation(aProcess);
@@ -145,11 +124,14 @@ public class FirstComeFirstServe {
                 if(aProcess.getProcessArrivalTime() > totalTime) totalTime = aProcess.getProcessArrivalTime();
 
                 if(processOperation.getFrameID(aPageRef[aProcess.alreadyExecutedIdx]) == -1) {
-                    returnPageFault = handlePageFault(aProcess, processPriorityQueue, processOperation, totalFaults, blockedTime, totalTime);
-                    totalFaults = returnPageFault[0];
-                    blockedTime = returnPageFault[1];
+                    returnfault = new FirstComeFirstServe().handlePageFault(aProcess, processPriorityQueue, processOperation, totalFaults, blockedTime, totalTime);
+                    totalFaults = returnfault[0];
+                    blockedTime = returnfault[1];
                 } else {
-                    totalTime += calculateExecTime(aProcess);
+                    processPriorityQueue.remove();
+                    totalTime += getExecTime(aProcess, processQuanta);
+                    aProcess.processArrivalTime = totalTime;
+                    processPriorityQueue.add(aProcess);
                 }
             }
         }
